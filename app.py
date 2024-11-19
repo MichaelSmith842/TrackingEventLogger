@@ -1,60 +1,24 @@
-import pandas as pd
+from flask import Flask, render_template, jsonify
+from flask_cors import CORS
+import json
+import os
 
-# threshold to record event. 
-THRESHOLD = 1.5  
+app = Flask(__name__)
+CORS(app)
 
-# process the CSV
-def process_csv(file_path):
-    # load CSV
-    df = pd.read_csv(file_path)
+JSON_FILE_PATH = "/Users/michael/Desktop/EventLogger/converted_data/data.JSON"
 
-    # total acceleration magnitude
-    df['total_acceleration'] = (
-        (df['accelerometerAccelerationX(G)'] ** 2) +
-        (df['accelerometerAccelerationY(G)'] ** 2) +
-        (df['accelerometerAccelerationZ(G)'] ** 2)
-    ) ** 0.5
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-    # only rows where acceleration exceeds the threshold
-    events = df[df['total_acceleration'] > THRESHOLD]
-
-    # relevant columns 
-    detected_events = events[[
-        'loggingTime(txt)', 
-        'total_acceleration',  
-        'accelerometerAccelerationX(G)',
-        'accelerometerAccelerationY(G)',
-        'accelerometerAccelerationZ(G)',
-        'locationTrueHeading(°)',  # heading
-        'locationLatitude(WGS84)',  # lat
-        'locationLongitude(WGS84)',  # long
-        'locationSpeed(m/s)'  # speed
-    ]]
-
-    # re naming the columns 
-    detected_events.rename(columns={
-        'loggingTime(txt)': 'Timestamp',
-        'accelerometerAccelerationX(G)': 'Accel_X',
-        'accelerometerAccelerationY(G)': 'Accel_Y',
-        'accelerometerAccelerationZ(G)': 'Accel_Z',
-        'locationTrueHeading(°)': 'Heading',
-        'locationLatitude(WGS84)': 'Latitude',
-        'locationLongitude(WGS84)': 'Longitude',
-        'locationSpeed(m/s)': 'Speed'
-    }, inplace=True)
-
-
-    print("Detected Events:")
-    print(detected_events)
-
-    # Save the results to a new CSV file (optional)
-    output_file = "data/detected_events.csv"
-    detected_events.to_csv(output_file, index=False)
-    print(f"Results saved to {output_file}")
-
-
+@app.route('/get-events', methods=['GET'])
+def get_events():
+    if not os.path.exists(JSON_FILE_PATH):
+        return jsonify({"error": "JSON file not found"}), 404
+    with open(JSON_FILE_PATH, 'r') as json_file:
+        data = json.load(json_file)
+    return jsonify(data)
 
 if __name__ == "__main__":
-    # change file path to the path of your csv file 
-    file_path = "/Users/michael/Desktop/EventLogger/uploads/2024-11-19_10_42_56_my_IOS_device.csv"
-    process_csv(file_path)
+    app.run(debug=True)

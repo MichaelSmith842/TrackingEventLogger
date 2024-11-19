@@ -1,0 +1,12 @@
+CSV data came from SensorLog on the app store
+
+TO RUN:
+
+add your CSV file to uploads/your-csv-file
+
+change the path within csv-to-JSON.py you will need to do the same with your converted_data/data.JSON file as well.   
+
+the data.JSON file must be created before running the application
+
+the THRESHOLD value is the trigger for recording an event and can be changed
+

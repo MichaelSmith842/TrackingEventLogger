@@ -3,6 +3,12 @@ body {
   font-family: Arial, sans-serif;
 }
 
+.name {
+  font-family: cursive;
+  color:lightgrey;
+
+}
+
 .timestamp-box {
   border: 1px solid #ccc;
   border-radius: 5px;
